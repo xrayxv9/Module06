@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <cfloat>
+#include <limits.h>
 
 #define STRING 1
 #define FLOAT 2
@@ -15,8 +17,4 @@ class ScalarConverter
 		~ScalarConverter();
 		ScalarConverter& operator=( const ScalarConverter &cpy );
 		static void convert(std::string toConvert);
-
-	private:
-		static void print( char letter );
-		static void print( std::string );
 };
