@@ -65,7 +65,10 @@ void printDouble(double n, bool valid)
 		std::cout << "double : Impossible" << std::endl;
 		return ;
 	}
-	std::cout << "double : " << n << std::endl;
+	if (static_cast<int>(n) == n)
+		std::cout << "double : " << n << ".0"<< std::endl;
+	else
+		std::cout << "double : " << n << std::endl;
 }
 
 void printFloat(float n, bool valid)
@@ -75,7 +78,11 @@ void printFloat(float n, bool valid)
 		std::cout << "float : Impossible" << std::endl;
 		return ;
 	}
-	std::cout << "float : " << n << "f" << std::endl;
+	if (static_cast<int>(n) == n)
+		std::cout << "float : " << n << ".0f" << std::endl;
+	else
+		std::cout << "float : " << n << "f" << std::endl;
+
 }
 
 void printNonLitteral( std::string input )
@@ -149,16 +156,13 @@ void fromFloat( std::string input )
 		printInt(full, true);
 	else 
 		printInt(0, false);
-	if (num > FLT_MAX || num < FLT_MIN)
-		printFloat(num, false);
-	else 
-		printFloat(num, true);
+	printFloat(num, true);
 	printDouble(doubleNumber, true);
 }
 
 void fromDouble( std::string input )
 {
-	double doubleNumber = std::strtof(input.c_str(), 0);
+	double doubleNumber = std::strtod(input.c_str(), 0);
 	float num = static_cast<float>(doubleNumber);
 	long long int full = static_cast<long long int>(doubleNumber);
 	char c;
@@ -172,10 +176,7 @@ void fromDouble( std::string input )
 		printInt(full, true);
 	else 
 		printInt(0, false);
-	if (num > FLT_MAX || num < FLT_MIN)
-		printFloat(num, false);
-	else 
-		printFloat(num, true);
+	printFloat(num, true);
 	printDouble(doubleNumber, true);
 }
 
@@ -242,7 +243,7 @@ void ScalarConverter::convert( const std::string toConvert)
 
 	if (checkText(toConvert))
 		printNonLitteral(toConvert);
-	else if (toConvert.length() == 1)
+	else if (toConvert.length() == 1 && !isdigit(toConvert[0]))
 		fromChar(toConvert);
 	else if (toConvert[toConvert.length() - 1] == 'f')
 		fromFloat(toConvert);
