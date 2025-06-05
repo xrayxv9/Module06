@@ -2,15 +2,6 @@
 #include <cctype>
 #include <cstdlib>
 
-/*
-		void printChar( char c, bool valid );
-		void printInt( int c, bool valid );
-		void printDouble( double c, bool valid );
-		void printFloat( float c, bool valid );
-
-* */
-
-
 ScalarConverter::ScalarConverter() {}
 
 ScalarConverter::~ScalarConverter() {}
@@ -51,7 +42,7 @@ void	printChar(char c, bool valid)
 		std::cout << "char : Impossible" << std::endl;
 		return ;
 	}
-	if (c >= 32)
+	if (c >= 32 && c <= 126)
 		std::cout << "char : " << c << std::endl;
 	else
 		std::cout << "char : " << "character not printable" << std::endl;
@@ -67,7 +58,7 @@ void printInt(int n, bool valid)
 	std::cout << "int : " << n << std::endl;
 }
 
-void printDouble(int n, bool valid)
+void printDouble(double n, bool valid)
 {
 	if (!valid)
 	{
@@ -77,7 +68,7 @@ void printDouble(int n, bool valid)
 	std::cout << "double : " << n << std::endl;
 }
 
-void printFloat(int n, bool valid)
+void printFloat(float n, bool valid)
 {
 	if (!valid)
 	{
@@ -144,15 +135,21 @@ static bool isValid( std::string input )
 
 void fromFloat( std::string input )
 {
-	char *end;
 	float num = std::strtof(input.c_str(), 0);
-	int full = static_cast<int>(num);
-	char c = static_cast<char>(num);
+	long long int full = static_cast<long long int>(num);
+	char c;
+	if (full >= 127)
+		c = -1;
+	else
+		c = static_cast<char>(num);
 	double doubleNumber = static_cast<double>(num);
 
 	printChar(c, true);
-	printInt(full, true);
-	if (num > FLT_MAX || num < FLT_MIN || errno == ERANGE)
+	if (full <= INT_MAX)
+		printInt(full, true);
+	else 
+		printInt(0, false);
+	if (num > FLT_MAX || num < FLT_MIN)
 		printFloat(num, false);
 	else 
 		printFloat(num, true);
@@ -161,20 +158,75 @@ void fromFloat( std::string input )
 
 void fromDouble( std::string input )
 {
-	// double num = std::atod(input.c_str());
-	(void)input;
-	float num = 2.3f;
-	int full = static_cast<int>(num);
-	char c = static_cast<char>(num);
-	double doubleNumber = static_cast<double>(num);
+	double doubleNumber = std::strtof(input.c_str(), 0);
+	float num = static_cast<float>(doubleNumber);
+	long long int full = static_cast<long long int>(doubleNumber);
+	char c;
+	if (full >= 127)
+		c = -1;
+	else
+		c = static_cast<char>(doubleNumber);
 
 	printChar(c, true);
-	printInt(full, true);
-	if (num > FLT_MAX || num < FLT_MIN || errno == ERANGE)
+	if (full <= INT_MAX)
+		printInt(full, true);
+	else 
+		printInt(0, false);
+	if (num > FLT_MAX || num < FLT_MIN)
 		printFloat(num, false);
 	else 
 		printFloat(num, true);
 	printDouble(doubleNumber, true);
+}
+
+void fromChar( std::string input )
+{
+	char c = input[0];
+	int full = static_cast<int>(c);
+	double doubleNumber = static_cast<double>(c);
+	float num = static_cast<float>(c);
+
+	printChar(c, true);
+	printInt(full, true);
+	printFloat(num, true);
+	printDouble(doubleNumber, true);
+}
+
+void fromInt( std::string input )
+{
+	if (input.length() <= 11)
+	{
+		long long int full = std::atol(input.c_str());
+		char c;
+		if (full >= 127)
+			c = -1;
+		else
+			c = static_cast<char>(full);
+		double doubleNumber = static_cast<double>(full);
+		float num = static_cast<float>(full);
+
+		if (full <= INT_MAX)
+		{
+			printChar(c, true);
+			printInt(full, true);
+			printFloat(num, true);
+			printDouble(doubleNumber, true);
+		}
+		else
+		{
+			printChar('c', false);
+			printInt(0, false);
+			printFloat(0, false);
+			printDouble(0, false);
+		}
+	}
+	else
+	{
+		printChar('c', false);
+		printInt(0, false);
+		printFloat(0, false);
+		printDouble(0, false);
+	}
 }
 
 void ScalarConverter::convert( const std::string toConvert)
@@ -185,14 +237,18 @@ void ScalarConverter::convert( const std::string toConvert)
 		printInt(0, false);
 		printFloat(0, false);
 		printDouble(0, false);
+		return ;
 	}
 
 	if (checkText(toConvert))
-	{
 		printNonLitteral(toConvert);
-		return ;
-	}
-	if (toConvert[toConvert.length() - 1] == 'f')
+	else if (toConvert.length() == 1)
+		fromChar(toConvert);
+	else if (toConvert[toConvert.length() - 1] == 'f')
 		fromFloat(toConvert);
+	else if (toConvert.find('.') != std::string::npos)
+		fromDouble(toConvert);
+	else
+		fromInt(toConvert);
 		
 }
